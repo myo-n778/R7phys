@@ -1,6 +1,6 @@
-# PHYSICS ULTRA Master
+# Physics for Class
 
-98期向け物理学習WEBアプリケーション
+物理授業用WEBアプリケーション
 
 ## 概要
 
