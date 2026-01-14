@@ -1716,76 +1716,43 @@
                     return; // Weak Pointsモードの場合は通常のメニューを表示しない
                 }
 
-                const eHeader = document.createElement('div');
-                eHeader.className = 'era-header';
-                eHeader.innerHTML = `<span>${categoryName} <small class="opacity-50">(${categoryProblems.length})</small></span><i class="fas fa-chevron-right text-[10px]"></i>`;
-
-                const eContent = document.createElement('div');
-                eContent.className = 'era-content grid grid-cols-4 gap-1.5 p-2 max-h-0 overflow-hidden opacity-0 invisible';
-
-                if (categoryProblems.length > 0) {
-                    for (let i = 0; i < categoryProblems.length; i += 10) {
-                        const rangeLabel = `${i + 1}-${Math.min(i + 10, categoryProblems.length)}`;
-
-                        // この範囲の問題セットの履歴を取得
-                        const rangeHistory = userHistory.filter(h =>
-                            h.summaryEra === categoryName && h.summaryRange === rangeLabel
-                        );
-                        const attemptCount = rangeHistory.length;
-                        let lastAttemptDate = '';
-                        if (rangeHistory.length > 0) {
-                            // 最新の日付を取得
-                            const latest = rangeHistory.sort((a, b) => b.timestamp - a.timestamp)[0];
-                            if (latest.date) {
-                                const dateStr = latest.date;
-                                // 日付を整形（例: "01/15" → "1/15", "01/05" → "1/5"）
-                                const parts = dateStr.split('/');
-                                lastAttemptDate = `${parseInt(parts[0])}/${parseInt(parts[1])}`;
-                            }
-                        }
-
-                        const btn = document.createElement('button');
-                        btn.className = "bg-white/5 p-1.5 rounded-lg text-[8px] font-black min-h-[42px] flex flex-col items-center justify-center gap-0.5";
-
-                        // ボタンの内容を構築
-                        let btnContent = `<span class="text-[9px]">${rangeLabel}</span>`;
-                        if (attemptCount > 0) {
-                            btnContent += `<span class="text-[7px] text-cyan-400 opacity-70">${attemptCount}回</span>`;
-                            if (lastAttemptDate) {
-                                btnContent += `<span class="text-[7px] text-slate-400 opacity-60">${lastAttemptDate}</span>`;
-                            }
-                        }
-                        btn.innerHTML = btnContent;
-
-                        btn.onclick = () => {
-                            currentSessionEra = categoryName;
-                            currentSessionRangeLabel = rangeLabel;
-                            let problemsToUse = categoryProblems.slice(i, i + 10);
-
-                            // Weak Pointsモード: 間違えた問題だけをフィルタリング
-                            if (isWeakPointsMode) {
-                                problemsToUse = problemsToUse.filter(q => {
-                                    const stats = questionStats[q.id];
-                                    return stats && stats.total > 0 && stats.correct < stats.total;
-                                });
-                            }
-
-                            quizData = problemsToUse;
-                            startQuiz();
-                        };
-                        eContent.appendChild(btn);
+                // この分野の履歴を取得
+                const categoryHistory = userHistory.filter(h => h.summaryEra === categoryName);
+                const attemptCount = categoryHistory.length;
+                let lastAttemptDate = '';
+                if (categoryHistory.length > 0) {
+                    const latest = categoryHistory.sort((a, b) => b.timestamp - a.timestamp)[0];
+                    if (latest.date) {
+                        const dateStr = latest.date;
+                        const parts = dateStr.split('/');
+                        lastAttemptDate = `${parseInt(parts[0])}/${parseInt(parts[1])}`;
                     }
-                } else {
-                    eContent.innerHTML = '<div class="col-span-4 text-[8px] opacity-30 text-center py-2">NO DATA</div>';
                 }
 
-                eHeader.onclick = (ev) => {
-                    ev.stopPropagation();
-                    eContent.classList.toggle('expanded');
+                const eHeader = document.createElement('div');
+                eHeader.className = 'era-header cursor-pointer hover:bg-white/10 transition-all';
+
+                // 履歴情報を含むヘッダー表示
+                let headerContent = `<span>${categoryName} <small class="opacity-50">(${categoryProblems.length}問)</small></span>`;
+                if (attemptCount > 0) {
+                    headerContent = `<span class="flex items-center gap-2">${categoryName} <small class="opacity-50">(${categoryProblems.length}問)</small> <span class="text-[8px] text-cyan-400">${attemptCount}回</span>${lastAttemptDate ? `<span class="text-[8px] text-slate-400">${lastAttemptDate}</span>` : ''}</span>`;
+                }
+                headerContent += `<i class="fas fa-play text-[10px]" style="color: var(--accent-primary)"></i>`;
+                eHeader.innerHTML = headerContent;
+
+                // シート名をクリックすると直接クイズ開始
+                eHeader.onclick = () => {
+                    if (categoryProblems.length === 0) {
+                        showModal("問題なし", "この分野には問題がありません。");
+                        return;
+                    }
+                    currentSessionEra = categoryName;
+                    currentSessionRangeLabel = "ALL";
+                    quizData = [...categoryProblems];
+                    startQuiz();
                 };
 
                 container.appendChild(eHeader);
-                container.appendChild(eContent);
             });
 
             // Weak Pointsモード用のUIを追加
