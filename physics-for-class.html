@@ -1946,7 +1946,15 @@
                 btn.onclick = () => handleAnswer(opt, btn);
                 oc.appendChild(btn);
             });
-            getEl('feedback-area').classList.add('hidden'); window.scrollTo({ top: 0, behavior: 'smooth' });
+            getEl('feedback-area').classList.add('hidden');
+            // 確実に画面上部にスクロールする（複数の方法を併用）
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.body.scrollTop = 0; // Safari対応
+            document.documentElement.scrollTop = 0; // その他ブラウザ対応
+            // 念のため少し遅延してもう一度スクロール
+            setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'auto' });
+            }, 50);
         }
 
         async function handleAnswer(selected, btn) {
@@ -2239,7 +2247,18 @@
             const savedTheme = localStorage.getItem('ethics_theme_mode') || 'modeA';
             applyTheme(savedTheme);
             window.syncAllFromSpreadsheet(true);
-            setOnClick('next-btn-action', () => { currentIdx++; if (currentIdx < quizData.length) showQuestion(); else finishSession(); });
+            setOnClick('next-btn-action', () => {
+                currentIdx++;
+                if (currentIdx < quizData.length) {
+                    // 先にスクロールを開始してから問題を表示
+                    window.scrollTo({ top: 0, behavior: 'auto' });
+                    document.body.scrollTop = 0;
+                    document.documentElement.scrollTop = 0;
+                    showQuestion();
+                } else {
+                    finishSession();
+                }
+            });
             setOnClick('sync-all-btn-action', () => window.syncAllFromSpreadsheet(false));
             setOnClick('cloud-sync-toggle-btn', () => { const area = getEl('sync-area'); if (area) area.classList.toggle('hidden'); });
         };
