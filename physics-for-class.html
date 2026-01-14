@@ -213,18 +213,26 @@
             margin-top: 1rem;
             box-shadow: none !important;
             overflow-x: auto;
-            /* スマホで横スクロールを許可 */
+            overflow-y: auto;
+            /* スマホで横・縦スクロールを許可 */
+            max-height: 400px;
+            /* 枠内でスクロール可能に */
             scrollbar-width: thin;
             /* スクロールバーを控えめに */
         }
 
         .ranking-card::-webkit-scrollbar {
             height: 4px;
+            width: 4px;
         }
 
         .ranking-card::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
+        }
+
+        .ranking-card::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
         }
 
         /* 中のグリッドが適切な幅になるように固定（status列まで含めて広めに設定） */

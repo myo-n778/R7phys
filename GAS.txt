@@ -288,7 +288,7 @@ if (historySheet) {
     });
   }
   
-  result.ranking = Object.values(userFullMap).sort((a, b) => b.exp - a.exp).slice(0, 5);
+  result.ranking = Object.values(userFullMap).sort((a, b) => b.exp - a.exp); // 全参加者を返す
 }
 
 // 連続正解数の取得（詳細履歴ログから直接計算）
